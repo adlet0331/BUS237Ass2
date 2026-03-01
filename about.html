@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Developer Profile – ABC Logistics</title>
+  <style>
+    /* ── Global Reset & Variables ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #1a2540;
+      --blue:   #2563eb;
+      --blue-light: #3b82f6;
+      --teal:   #0ea5e9;
+      --bg:     #f0f4f8;
+      --card:   #ffffff;
+      --text:   #1e293b;
+      --muted:  #64748b;
+      --danger: #dc2626;
+      --success:#16a34a;
+      --radius: 10px;
+      --shadow: 0 2px 12px rgba(0,0,0,.10);
+      --font:   Arial, Calibri, Tahoma, 'Times New Roman', sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Navigation Bar (identical to index.html) ── */
+    nav {
+      background: var(--navy);
+      display: flex;
+      align-items: center;
+      padding: 0 2rem;
+      height: 60px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      color: #fff;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: .5px;
+      margin-right: auto;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .nav-brand span { color: var(--teal); }
+    nav a {
+      color: #c7d2e7;
+      text-decoration: none;
+      padding: .4rem 1rem;
+      border-radius: 6px;
+      margin-left: .25rem;
+      font-size: .95rem;
+      transition: background .2s, color .2s;
+    }
+    nav a:hover, nav a.active {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    /* ── Page Header ── */
+    .page-header {
+      background: linear-gradient(135deg, var(--navy) 0%, #243b6e 100%);
+      color: #fff;
+      padding: 2rem 2rem 1.5rem;
+    }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; }
+    .page-header p  { color: #9fb4d8; margin-top: .3rem; font-size: .95rem; }
+
+    /* ── Main Content ── */
+    .main {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1.5rem 3rem;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+    }
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+      border-bottom: 2px solid var(--bg);
+      padding-bottom: .6rem;
+    }
+
+    /* ── Profile Card (left) ── */
+    .profile-avatar {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--teal) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      margin: 0 auto 1rem;
+    }
+    .profile-name {
+      text-align: center;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .profile-title {
+      text-align: center;
+      font-size: .85rem;
+      color: var(--muted);
+      margin-top: .2rem;
+    }
+    .profile-divider {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 1rem 0;
+    }
+    .profile-detail {
+      display: flex;
+      align-items: flex-start;
+      gap: .6rem;
+      margin-bottom: .75rem;
+      font-size: .88rem;
+    }
+    .profile-detail-icon { font-size: 1rem; flex-shrink: 0; margin-top: .05rem; }
+    .profile-detail-label { font-weight: 600; color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .3px; }
+    .profile-detail-value { color: var(--text); }
+
+    .skill-chip {
+      display: inline-block;
+      background: #eff6ff;
+      color: var(--blue);
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: .2rem .6rem;
+      font-size: .78rem;
+      font-weight: 600;
+      margin: .2rem .15rem .2rem 0;
+    }
+
+    /* ── Bio Sections (right) ── */
+    .bio-section { margin-bottom: 1.4rem; }
+    .bio-section h3 {
+      font-size: .98rem;
+      font-weight: 700;
+      color: var(--blue);
+      margin-bottom: .55rem;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .bio-section p {
+      font-size: .92rem;
+      line-height: 1.65;
+      color: #334155;
+    }
+
+    /* ── Contact Table ── */
+    .contact-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    .contact-table td { padding: .5rem .75rem; border-bottom: 1px solid #f1f5f9; }
+    .contact-table td:first-child { color: var(--muted); font-weight: 600; width: 100px; }
+    .contact-table a { color: var(--blue); text-decoration: none; }
+    .contact-table a:hover { text-decoration: underline; }
+
+    /* ── Project Highlight ── */
+    .project-card {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: .75rem;
+    }
+    .project-card h4 { font-size: .92rem; font-weight: 700; color: var(--text); }
+    .project-card p  { font-size: .85rem; color: var(--muted); margin-top: .3rem; line-height: 1.5; }
+    .project-tag {
+      display: inline-block;
+      background: #f0fdf4;
+      color: var(--success);
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: .1rem .5rem;
+      font-size: .73rem;
+      font-weight: 700;
+      margin-top: .4rem;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 700px) {
+      .main { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ──────────────── Navigation ──────────────── -->
+<nav>
+  <div class="nav-brand">⬡ ABC <span>Logistics</span></div>
+  <a href="index.html">📦 Dashboard</a>
+  <a href="about.html" class="active">👤 Developer Profile</a>
+</nav>
+
+<!-- ──────────────── Page Header ──────────────── -->
+<div class="page-header">
+  <h1>Developer Profile</h1>
+  <p>The team behind the ABC Logistics Inventory Command Center</p>
+</div>
+
+<!-- ──────────────── Main Content ──────────────── -->
+<div class="main">
+
+  <!-- Left: Profile Card -->
+  <div class="card">
+    <div class="profile-avatar">👤</div>
+    <!-- TODO: Replace "Your Name" with your full name -->
+    <div class="profile-name">Your Name</div>
+    <!-- TODO: Replace program/university as needed -->
+    <div class="profile-title">MIS Student &amp; Consultant<br/>Simon Fraser University</div>
+    <hr class="profile-divider" />
+
+    <div class="profile-detail">
+      <span class="profile-detail-icon">🎓</span>
+      <div>
+        <div class="profile-detail-label">Program</div>
+        <div class="profile-detail-value">BBA – Management Information Systems</div>
+      </div>
+    </div>
+
+    <div class="profile-detail">
+      <span class="profile-detail-icon">🎓</span>
+      <div>
+        <div class="profile-detail-label">Student #</div>
+        <!-- TODO: Replace with your actual student number -->
+        <div class="profile-detail-value">301-XXX-XXX</div>
+      </div>
+    </div>
+
+    <div class="profile-detail">
+      <span class="profile-detail-icon">📅</span>
+      <div>
+        <div class="profile-detail-label">Term</div>
+        <div class="profile-detail-value">Spring 2025 – BUS 237</div>
+      </div>
+    </div>
+
+    <div class="profile-detail">
+      <span class="profile-detail-icon">📍</span>
+      <div>
+        <div class="profile-detail-label">Location</div>
+        <div class="profile-detail-value">Burnaby, BC, Canada</div>
+      </div>
+    </div>
+
+    <hr class="profile-divider" />
+    <div style="font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:.5rem;">SKILLS</div>
+    <span class="skill-chip">HTML / CSS</span>
+    <span class="skill-chip">JavaScript</span>
+    <span class="skill-chip">Business Analysis</span>
+    <span class="skill-chip">AI Prompt Engineering</span>
+    <span class="skill-chip">Excel / VBA</span>
+    <span class="skill-chip">Data Visualization</span>
+  </div>
+
+  <!-- Right: Bio Content -->
+  <div class="card">
+
+    <div class="bio-section">
+      <h3>👋 About Me</h3>
+      <p>
+        I am a second-year BBA student specializing in Management Information Systems at Simon Fraser University.
+        My passion lies at the intersection of business strategy and emerging technology — I believe the best
+        digital solutions are born from a deep understanding of the people who use them.
+      </p>
+      <p style="margin-top:.65rem;">
+        For this project I acted as both Business Analyst and Technology Consultant for ABC Logistics, translating
+        Floor Manager Sarah's operational requirements into a live, browser-based inventory dashboard — without
+        writing a single line of code manually, by leveraging AI as a development partner.
+      </p>
+    </div>
+
+    <div class="bio-section">
+      <h3>💼 Project: ABC Logistics Inventory Command Center</h3>
+      <div class="project-card">
+        <h4>Inventory Command Center Dashboard</h4>
+        <p>
+          A multi-page web application built with HTML, CSS, and JavaScript that provides real-time inventory
+          tracking, Chart.js visualizations, localStorage persistence, price/value calculations, and low-stock
+          alerts — all delivered through an intuitive, mobile-friendly interface.
+        </p>
+        <span class="project-tag">✔ Live &amp; Deployed</span>
+        <span class="project-tag" style="background:#eff6ff;color:var(--blue);border-color:#bfdbfe;">Chart.js</span>
+        <span class="project-tag" style="background:#eff6ff;color:var(--blue);border-color:#bfdbfe;">localStorage</span>
+      </div>
+    </div>
+
+    <div class="bio-section">
+      <h3>🎯 Approach &amp; Philosophy</h3>
+      <p>
+        Great software starts with great requirements. Before writing (or prompting) a single line of code, I
+        invest time in understanding the business context, the end user's pain points, and the success criteria.
+        This project reinforced my belief that AI is most powerful when guided by structured thinking and clear
+        communication — two core competencies of an MIS professional.
+      </p>
+    </div>
+
+    <div class="bio-section">
+      <h3>📬 Contact &amp; Availability</h3>
+      <table class="contact-table">
+        <tr>
+          <td>Email</td>
+          <!-- TODO: Replace with your actual email address -->
+          <td><a href="mailto:yourname@sfu.ca">yourname@sfu.ca</a></td>
+        </tr>
+        <tr>
+          <td>LinkedIn</td>
+          <!-- TODO: Replace with your actual LinkedIn URL -->
+          <td><a href="https://linkedin.com/in/yourprofile" target="_blank" rel="noopener noreferrer">linkedin.com/in/yourprofile</a></td>
+        </tr>
+        <tr>
+          <td>GitHub</td>
+          <!-- TODO: Replace with your actual GitHub username -->
+          <td><a href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer">github.com/yourusername</a></td>
+        </tr>
+        <tr>
+          <td>Availability</td>
+          <td>Open to consulting &amp; freelance work · Responds within 24 hrs</td>
+        </tr>
+      </table>
+    </div>
+
+  </div><!-- /.card -->
+
+</div><!-- /.main -->
+
+</body>
+</html>
