@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ABC Logistics – Inventory Command Center</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    /* ── Global Reset & Variables ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #1a2540;
+      --blue:   #2563eb;
+      --blue-light: #3b82f6;
+      --teal:   #0ea5e9;
+      --bg:     #f0f4f8;
+      --card:   #ffffff;
+      --text:   #1e293b;
+      --muted:  #64748b;
+      --danger: #dc2626;
+      --warn:   #f59e0b;
+      --success:#16a34a;
+      --radius: 10px;
+      --shadow: 0 2px 12px rgba(0,0,0,.10);
+      --font:   Arial, Calibri, Tahoma, 'Times New Roman', sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Navigation Bar ── */
+    nav {
+      background: var(--navy);
+      display: flex;
+      align-items: center;
+      padding: 0 2rem;
+      height: 60px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      color: #fff;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: .5px;
+      margin-right: auto;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .nav-brand span { color: var(--teal); }
+    nav a {
+      color: #c7d2e7;
+      text-decoration: none;
+      padding: .4rem 1rem;
+      border-radius: 6px;
+      margin-left: .25rem;
+      font-size: .95rem;
+      transition: background .2s, color .2s;
+    }
+    nav a:hover, nav a.active {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    /* ── Page Layout ── */
+    .page-header {
+      background: linear-gradient(135deg, var(--navy) 0%, #243b6e 100%);
+      color: #fff;
+      padding: 2rem 2rem 1.5rem;
+    }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; }
+    .page-header p  { color: #9fb4d8; margin-top: .3rem; font-size: .95rem; }
+
+    .main {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 1.5rem 3rem;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 1.5rem;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+    }
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+      border-bottom: 2px solid var(--bg);
+      padding-bottom: .6rem;
+    }
+
+    /* ── Input Form ── */
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+      display: block;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: .35rem;
+    }
+    .form-group input {
+      width: 100%;
+      padding: .55rem .8rem;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: .95rem;
+      font-family: var(--font);
+      color: var(--text);
+      transition: border-color .2s;
+      outline: none;
+    }
+    .form-group input:focus { border-color: var(--blue); }
+    .form-group input.error { border-color: var(--danger); }
+
+    .error-msg {
+      color: var(--danger);
+      font-size: .78rem;
+      margin-top: .25rem;
+      min-height: 1em;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: .65rem;
+      border: none;
+      border-radius: 6px;
+      font-size: .95rem;
+      font-weight: 700;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-primary:hover { opacity: .88; }
+    .btn-danger  { background: var(--danger); color: #fff; margin-top: .75rem; }
+    .btn-danger:hover  { opacity: .88; }
+
+    /* ── Stats Bar ── */
+    .stats-bar {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .stat-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.1rem 1.4rem;
+      border-left: 4px solid var(--blue);
+    }
+    .stat-card.warn { border-left-color: var(--warn); }
+    .stat-card.success { border-left-color: var(--success); }
+    .stat-label { font-size: .78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+    .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--text); margin-top: .2rem; }
+
+    /* ── Inventory Table ── */
+    .right-col { display: flex; flex-direction: column; gap: 1.5rem; }
+    .table-wrapper { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .9rem;
+    }
+    thead th {
+      background: var(--navy);
+      color: #fff;
+      padding: .65rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+    thead th:last-child { text-align: right; }
+    tbody tr { border-bottom: 1px solid #e2e8f0; transition: background .15s; }
+    tbody tr:hover { background: #f8fafc; }
+    tbody td { padding: .65rem 1rem; vertical-align: middle; }
+    tbody td:last-child { text-align: right; }
+    .badge {
+      display: inline-block;
+      padding: .15rem .55rem;
+      border-radius: 12px;
+      font-size: .75rem;
+      font-weight: 700;
+    }
+    .badge-low  { background: #fee2e2; color: var(--danger); }
+    .badge-ok   { background: #dcfce7; color: var(--success); }
+    .btn-remove {
+      background: none;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 5px;
+      padding: .2rem .55rem;
+      font-size: .8rem;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all .15s;
+    }
+    .btn-remove:hover { border-color: var(--danger); color: var(--danger); }
+
+    .empty-state {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--muted);
+    }
+    .empty-state svg { opacity: .25; margin-bottom: .75rem; }
+
+    /* ── Chart ── */
+    .chart-container { position: relative; height: 280px; }
+
+    /* ── Toggle Chart ── */
+    .chart-toggle {
+      display: flex;
+      gap: .5rem;
+      margin-bottom: 1rem;
+    }
+    .toggle-btn {
+      padding: .35rem .9rem;
+      border: 1.5px solid var(--blue);
+      border-radius: 5px;
+      background: none;
+      color: var(--blue);
+      font-size: .82rem;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .toggle-btn.active { background: var(--blue); color: #fff; }
+
+    /* ── Responsive ── */
+    @media (max-width: 800px) {
+      .main { grid-template-columns: 1fr; }
+      .stats-bar { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 500px) {
+      .stats-bar { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ──────────────── Navigation ──────────────── -->
+<nav>
+  <div class="nav-brand">⬡ ABC <span>Logistics</span></div>
+  <a href="index.html" class="active">📦 Dashboard</a>
+  <a href="about.html">👤 Developer Profile</a>
+</nav>
+
+<!-- ──────────────── Page Header ──────────────── -->
+<div class="page-header">
+  <h1>Inventory Command Center</h1>
+  <p>Real-time warehouse tracking for Sarah, Floor Manager · Data persists in browser storage</p>
+</div>
+
+<!-- ──────────────── Main Grid ──────────────── -->
+<div class="main">
+
+  <!-- Stats Bar (spans both columns) -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-label">Total SKUs</div>
+      <div class="stat-value" id="stat-skus">0</div>
+    </div>
+    <div class="stat-card warn">
+      <div class="stat-label">Low Stock Items</div>
+      <div class="stat-value" id="stat-low">0</div>
+    </div>
+    <div class="stat-card success">
+      <div class="stat-label">Total Inventory Value</div>
+      <div class="stat-value" id="stat-value">$0.00</div>
+    </div>
+  </div>
+
+  <!-- ── Left Column: Input Form ── -->
+  <div class="card">
+    <h2>Add / Update Item</h2>
+
+    <div class="form-group">
+      <label for="item-name">Item Name</label>
+      <input type="text" id="item-name" placeholder="e.g. Box Tape" autocomplete="off" />
+      <div class="error-msg" id="err-name"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="item-qty">Quantity (units)</label>
+      <input type="number" id="item-qty" placeholder="e.g. 50" min="0" step="1" />
+      <div class="error-msg" id="err-qty"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="item-price">Unit Price ($)</label>
+      <input type="number" id="item-price" placeholder="e.g. 3.99" min="0" step="0.01" />
+      <div class="error-msg" id="err-price"></div>
+    </div>
+
+    <button class="btn btn-primary" onclick="addItem()">＋ Add to Inventory</button>
+    <button class="btn btn-danger"  onclick="clearAll()">🗑 Clear All Items</button>
+  </div>
+
+  <!-- ── Right Column ── -->
+  <div class="right-col">
+
+    <!-- Inventory Table -->
+    <div class="card">
+      <h2>Inventory List</h2>
+      <div class="table-wrapper">
+        <table id="inv-table">
+          <thead>
+            <tr>
+              <th>Item Name</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th>Total Value</th>
+              <th>Status</th>
+              <th>Remove</th>
+            </tr>
+          </thead>
+          <tbody id="inv-body">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="empty-state">
+        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/>
+          <path d="M16 3H8a2 2 0 00-2 2v2h12V5a2 2 0 00-2-2z"/>
+        </svg>
+        <p>No items yet. Add your first item above.</p>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="card">
+      <h2>Inventory Visualization</h2>
+      <div class="chart-toggle">
+        <button class="toggle-btn active" id="btn-bar" onclick="setChartType('bar')">Bar Chart</button>
+        <button class="toggle-btn"        id="btn-pie" onclick="setChartType('pie')">Pie Chart</button>
+      </div>
+      <div class="chart-container">
+        <canvas id="inv-chart"></canvas>
+      </div>
+    </div>
+
+  </div><!-- /.right-col -->
+</div><!-- /.main -->
+
+<script>
+/* ══════════════════════════════════════════
+   Inventory Command Center – Logic
+   Options implemented:
+     A) Price + Total Value column
+     B) Red bar if Qty < 10 (low stock)
+     C) Bar / Pie chart toggle
+   ══════════════════════════════════════════ */
+
+const LOW_STOCK_THRESHOLD = 10;
+let items = [];          // [{name, qty, price}]
+let chartType = 'bar';
+let chartInstance = null;
+
+/* ── Persistence ── */
+function save() {
+  localStorage.setItem('abc_inventory', JSON.stringify(items));
+}
+function load() {
+  try {
+    const raw = localStorage.getItem('abc_inventory');
+    items = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(items)) items = [];
+  } catch (_) {
+    items = [];
+  }
+}
+
+/* ── Validation ── */
+function validate() {
+  let ok = true;
+  const name  = document.getElementById('item-name').value.trim();
+  const qtyRaw  = document.getElementById('item-qty').value.trim();
+  const priceRaw = document.getElementById('item-price').value.trim();
+
+  // Clear previous errors
+  ['err-name','err-qty','err-price'].forEach(id => document.getElementById(id).textContent = '');
+  ['item-name','item-qty','item-price'].forEach(id => document.getElementById(id).classList.remove('error'));
+
+  if (!name) {
+    document.getElementById('err-name').textContent = 'Item name is required.';
+    document.getElementById('item-name').classList.add('error');
+    ok = false;
+  }
+
+  // Quantity: must be a non-negative integer, no alpha chars
+  if (qtyRaw === '' || !/^\d+$/.test(qtyRaw)) {
+    document.getElementById('err-qty').textContent = 'Enter a valid whole number (≥ 0).';
+    document.getElementById('item-qty').classList.add('error');
+    ok = false;
+  } else if (parseInt(qtyRaw, 10) < 0) {
+    document.getElementById('err-qty').textContent = 'Quantity cannot be negative.';
+    document.getElementById('item-qty').classList.add('error');
+    ok = false;
+  }
+
+  // Price: must be a non-negative number, no alpha chars
+  if (priceRaw === '' || !/^\d+(\.\d+)?$/.test(priceRaw)) {
+    document.getElementById('err-price').textContent = 'Enter a valid price (e.g. 3.99).';
+    document.getElementById('item-price').classList.add('error');
+    ok = false;
+  } else if (parseFloat(priceRaw) < 0) {
+    document.getElementById('err-price').textContent = 'Price cannot be negative.';
+    document.getElementById('item-price').classList.add('error');
+    ok = false;
+  }
+
+  return ok;
+}
+
+/* ── Add Item ── */
+function addItem() {
+  if (!validate()) return;
+
+  const name  = document.getElementById('item-name').value.trim();
+  const qty   = parseInt(document.getElementById('item-qty').value.trim(), 10);
+  const price = parseFloat(document.getElementById('item-price').value.trim());
+
+  // Duplicate check (case-insensitive)
+  const dup = items.findIndex(i => i.name.toLowerCase() === name.toLowerCase());
+  if (dup !== -1) {
+    document.getElementById('err-name').textContent =
+      `"${name}" already exists. Remove it first, then re-add with the updated values.`;
+    document.getElementById('item-name').classList.add('error');
+    return;
+  }
+
+  items.push({ name, qty, price });
+  save();
+  render();
+
+  // Reset form
+  document.getElementById('item-name').value  = '';
+  document.getElementById('item-qty').value   = '';
+  document.getElementById('item-price').value = '';
+  document.getElementById('item-name').focus();
+}
+
+/* ── Remove single item ── */
+function removeItem(index) {
+  items.splice(index, 1);
+  save();
+  render();
+}
+
+/* ── Clear all ── */
+function clearAll() {
+  if (items.length === 0) return;
+  if (!confirm('Delete ALL inventory items? This cannot be undone.')) return;
+  items = [];
+  save();
+  render();
+}
+
+/* ── Render table + chart + stats ── */
+function render() {
+  renderTable();
+  renderChart();
+  renderStats();
+}
+
+function renderStats() {
+  const totalValue = items.reduce((s, i) => s + i.qty * i.price, 0);
+  const lowCount   = items.filter(i => i.qty < LOW_STOCK_THRESHOLD).length;
+  document.getElementById('stat-skus').textContent  = items.length;
+  document.getElementById('stat-low').textContent   = lowCount;
+  document.getElementById('stat-value').textContent = '$' + totalValue.toFixed(2);
+}
+
+function renderTable() {
+  const tbody = document.getElementById('inv-body');
+  const empty = document.getElementById('empty-state');
+  const table = document.getElementById('inv-table');
+
+  tbody.innerHTML = '';
+
+  if (items.length === 0) {
+    empty.style.display = 'block';
+    table.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  table.style.display = 'table';
+
+  items.forEach((item, i) => {
+    const total  = (item.qty * item.price).toFixed(2);
+    const isLow  = item.qty < LOW_STOCK_THRESHOLD;
+    const badgeCls  = isLow ? 'badge-low' : 'badge-ok';
+    const badgeTxt  = isLow ? '⚠ Low'    : '✔ OK';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${escHtml(item.name)}</strong></td>
+      <td>${item.qty}</td>
+      <td>$${item.price.toFixed(2)}</td>
+      <td><strong>$${total}</strong></td>
+      <td><span class="badge ${badgeCls}">${badgeTxt}</span></td>
+      <td><button class="btn-remove" onclick="removeItem(${i})">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderChart() {
+  const ctx = document.getElementById('inv-chart').getContext('2d');
+  const labels = items.map(i => i.name);
+  const data   = items.map(i => i.qty);
+  const colors = items.map(i =>
+    i.qty < LOW_STOCK_THRESHOLD ? 'rgba(220, 38, 38, 0.75)' : 'rgba(37, 99, 235, 0.75)'
+  );
+  const borderColors = items.map(i =>
+    i.qty < LOW_STOCK_THRESHOLD ? 'rgba(220, 38, 38, 1)' : 'rgba(37, 99, 235, 1)'
+  );
+
+  if (chartInstance) {
+    chartInstance.destroy();
+    chartInstance = null;
+  }
+
+  if (items.length === 0) return;
+
+  const isBar = chartType === 'bar';
+
+  chartInstance = new Chart(ctx, {
+    type: chartType,
+    data: {
+      labels,
+      datasets: [{
+        label: 'Quantity',
+        data,
+        backgroundColor: isBar ? colors : [
+          '#2563eb','#0ea5e9','#7c3aed','#16a34a','#f59e0b','#dc2626',
+          '#0891b2','#d97706','#9333ea','#15803d'
+        ],
+        borderColor: isBar ? borderColors : '#fff',
+        borderWidth: isBar ? 1.5 : 2,
+        borderRadius: isBar ? 5 : 0,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: !isBar },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const item = items[ctx.dataIndex];
+              return [
+                ` Qty: ${item.qty}`,
+                ` Price: $${item.price.toFixed(2)}`,
+                ` Total: $${(item.qty * item.price).toFixed(2)}`,
+                item.qty < LOW_STOCK_THRESHOLD ? ' ⚠ LOW STOCK' : ''
+              ].filter(Boolean);
+            }
+          }
+        }
+      },
+      scales: isBar ? {
+        y: {
+          beginAtZero: true,
+          ticks: { precision: 0 },
+          title: { display: true, text: 'Quantity (units)' }
+        }
+      } : {}
+    }
+  });
+}
+
+/* ── Chart Type Toggle ── */
+function setChartType(type) {
+  chartType = type;
+  document.getElementById('btn-bar').classList.toggle('active', type === 'bar');
+  document.getElementById('btn-pie').classList.toggle('active', type === 'pie');
+  renderChart();
+}
+
+/* ── Utility ── */
+function escHtml(str) {
+  return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ── Keyboard shortcut: Enter key submits form ── */
+['item-name','item-qty','item-price'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') addItem();
+  });
+});
+
+/* ── Init ── */
+load();
+render();
+</script>
+</body>
+</html>
